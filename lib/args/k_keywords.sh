@@ -35,9 +35,12 @@ keywords() {
     local ISOLATION_WORDS
     ISOLATION_WORDS=$(tr '\n' '|' < "$ISOLATION_FILE" | sed 's/|$//')
 
-    # Process the keywords
-    tr -s '[:space:]' '\n' < "${FILE}" | \
+    # Replace commas with newlines, then process each field as separate text
+    sed 's/,/\n/g' "$FILE" | \
+    # Now process each field content for keywords
     sed -e 's/[–—−]/-/g' | \
+    # Split each field into individual words
+    tr -s '[:space:]' '\n' | \
     sed -E 's/^[[:punct:]\/]+//; s/[[:punct:]\/]+$//' | \
     sed -E 's/[^[:alnum:]\/-]+/ /g' | \
     tr '[:upper:]' '[:lower:]' | \
@@ -47,7 +50,8 @@ keywords() {
     sed '/^$/d' | \
     sort | \
     uniq -c | \
-    sort -nr 
+    sort -nr
+
 
     return 0
 }
